@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/home/miapp
+      - /home/miapp/node_modules
+    command: npm run dev
+  monguito:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: dani
+      MONGO_INITDB_ROOT_PASSWORD: password
