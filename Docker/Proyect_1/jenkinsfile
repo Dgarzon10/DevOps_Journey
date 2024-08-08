@@ -1,0 +1,47 @@
+pipeline {
+    agent {
+        node {
+            label 'docker-agent-docker'
+        }
+    }
+    triggers {
+        pollSCM '*/2 * * * *'
+    }
+    stages {
+        stage('Build and Start Docker Containers') {
+            steps {
+                echo "Building and starting Docker containers..."
+                sh '''
+                cd Docker/Proyect_1
+                docker compose up -d
+                '''
+            }
+        }
+        stage('Test Application') {
+            steps {
+                echo 'Testing application...'
+                sh '''
+                set -e
+
+                # Check if application is running
+                curl --fail http://localhost:3000 || (echo "Failed to reach application" && exit 1)
+
+                echo 'Creating a new record...'
+                curl --fail http://localhost:3000/crer || (echo "Failed to create new record" && exit 1)
+
+                echo 'Testing the new record...'
+                curl --fail http://localhost:3000 || (echo "Failed to test new record" && exit 1)
+                '''
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Cleaning up...'
+            sh '''
+            cd Docker/Proyect_1
+            docker compose down
+            '''
+        }
+    }
+}
