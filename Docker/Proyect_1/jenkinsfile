@@ -1,11 +1,8 @@
 pipeline {
-    agent {
-        node {
-            label 'docker-agent-docker'
-        }
+    agent any
     }
     triggers {
-        pollSCM '*/2 * * * *'
+        pollSCM '*/4 * * * *'
     }
     stages {
         stage('Build and Start Docker Containers') {
