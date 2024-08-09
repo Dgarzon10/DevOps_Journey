@@ -1,21 +1,12 @@
 pipeline {
-    agent any // Esto indica que el pipeline se puede ejecutar en cualquier agente disponible, incluido el maestro
+    agent {
+        docker {
+            image 'hashicorp/terraform:1.9.3'
+            label 'docker-agent'
+        }
+    }
 
     stages {
-         stage('Setup Terraform') {
-            steps {
-                // Instala Terraform en un directorio con permisos de escritura.
-                sh '''
-                curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
-                unzip terraform_1.5.0_linux_amd64.zip
-                mkdir -p $HOME/terraform
-                mv terraform $HOME/terraform/
-                export PATH=$PATH:$HOME/terraform
-                terraform --version
-                '''
-            }
-        }
-
         stage('Terraform Init') {
             steps {
                 // Inicializa Terraform.
