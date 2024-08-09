@@ -1,17 +1,29 @@
 pipeline {
-    agent {
-        docker {
-            image 'hashicorp/terraform:1.9.3'
-            label 'docker-agent'
-        }
-    }
+    agent any
 
     stages {
+        stage('Setup Terraform') {
+            steps {
+                // Instala Terraform en un directorio accesible para el usuario Jenkins.
+                sh '''
+                curl -LO https://releases.hashicorp.com/terraform/1.9.3/terraform_1.9.3_linux_amd64.zip
+                unzip terraform_1.9.3_linux_amd64.zip
+                mkdir -p $HOME/terraform
+                mv terraform $HOME/terraform/
+                export PATH=$PATH:$HOME/terraform
+                terraform --version
+                '''
+            }
+        }
+
         stage('Terraform Init') {
             steps {
-                // Inicializa Terraform.
+                // Inicializa Terraform en el directorio del proyecto.
                 dir('Terraform/Azure_lab') {
-                    sh 'terraform init'
+                    sh '''
+                    export PATH=$PATH:$HOME/terraform
+                    terraform init
+                    '''
                 }
             }
         }
@@ -20,7 +32,10 @@ pipeline {
             steps {
                 // Aplica los cambios planificados de Terraform.
                 dir('Terraform/Azure_lab') {
-                    sh 'terraform apply -auto-approve'
+                    sh '''
+                    export PATH=$PATH:$HOME/terraform
+                    terraform apply -auto-approve
+                    '''
                 }
             }
         }
@@ -36,7 +51,10 @@ pipeline {
             steps {
                 // Destruye los recursos creados por Terraform.
                 dir('Terraform/Azure_lab') {
-                    sh 'terraform destroy -auto-approve'
+                    sh '''
+                    export PATH=$PATH:$HOME/terraform
+                    terraform destroy -auto-approve
+                    '''
                 }
             }
         }
