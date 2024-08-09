@@ -2,13 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                // Clona el repositorio desde GitHub.
-                git 'https://github.com/Dgarzon10/DevOps_Journey'
-            }
-        }
-
         stage('Setup Terraform') {
             steps {
                 // Instala Terraform en el contenedor.
