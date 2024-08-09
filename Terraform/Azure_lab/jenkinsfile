@@ -1,0 +1,70 @@
+pipeline {
+    agent {
+        node {
+            label 'docker-agent-alpine'
+        }
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clona el repositorio desde GitHub.
+                git 'https://github.com/tu-usuario/tu-repositorio.git'
+            }
+        }
+
+        stage('Setup Terraform') {
+            steps {
+                // Instala Terraform en el contenedor.
+                sh '''
+                apk add --no-cache curl unzip
+                curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
+                unzip terraform_1.5.0_linux_amd64.zip
+                mv terraform /usr/local/bin/
+                terraform --version
+                '''
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                // Inicializa Terraform.
+                dir('Terraform/Azure_lab') {
+                    sh 'terraform init'
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                // Aplica los cambios planificados de Terraform.
+                dir('Terraform/Azure_lab') {
+                    sh 'terraform apply -auto-approve'
+                }
+            }
+        }
+
+        stage('Wait') {
+            steps {
+                // Espera para comprobar el resultado.
+                sh 'sleep 10'
+            }
+        }
+
+        stage('Terraform Destroy') {
+            steps {
+                // Destruye los recursos creados por Terraform.
+                dir('Terraform/Azure_lab') {
+                    sh 'terraform destroy -auto-approve'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Limpia el espacio de trabajo después de la ejecución.
+            cleanWs()
+        }
+    }
+}
