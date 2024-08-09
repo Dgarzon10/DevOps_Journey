@@ -1,12 +1,11 @@
 pipeline {
-    agent any
+    agent any // Esto indica que el pipeline se puede ejecutar en cualquier agente disponible, incluido el maestro
 
     stages {
         stage('Setup Terraform') {
             steps {
-                // Instala Terraform en el contenedor.
+                // Instala Terraform en el nodo maestro o en el contenedor.
                 sh '''
-                apk add --no-cache curl unzip
                 curl -LO https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
                 unzip terraform_1.5.0_linux_amd64.zip
                 mv terraform /usr/local/bin/
